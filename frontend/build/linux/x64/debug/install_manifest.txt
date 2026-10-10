@@ -1,0 +1,13 @@
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/strath_clean
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/icudtl.dat
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/lib/libflutter_linux_gtk.so
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/kernel_blob.bin
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/shaders/stretch_effect.frag
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/NativeAssetsManifest.json
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.bin
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/FontManifest.json
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES.Z
+/home/maks/Documents/StrathClean/team-17/frontend/build/linux/x64/debug/bundle/data/flutter_assets/version.json
