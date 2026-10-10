@@ -60,6 +60,34 @@ class _CleanRoomState extends State<CleanRoom> {
               ),
               const SizedBox(height: 20),
               Container(
+                alignment: Alignment.topLeft,
+                padding: const EdgeInsets.all(15),
+                decoration: const ShapeDecoration(
+                  shape: GradientOutlineInputBorder(
+                    gradient: brandGradient,
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Assigned to you', 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Sample Name ⋅ Today, 09:15-09:35',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    Text(
+                      'Last cleaned: Fri 9 Oct, 09:26 ⋅ Sample Name',
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
                 padding: const EdgeInsets.all(1.5),
                 decoration: const ShapeDecoration(
                   shape: GradientOutlineInputBorder(
@@ -77,32 +105,6 @@ class _CleanRoomState extends State<CleanRoom> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Opens the Issues page on top of this one; the app bar's back
-              // arrow returns here with the checklist still ticked.
-              DecoratedBox(
-                decoration: const ShapeDecoration(
-                  shape: GradientOutlineInputBorder(
-                    gradient: brandGradient,
-                    width: 1.5,
-                  ),
-                ),
-                child: TextButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/issues'),
-                  icon: const Icon(Icons.report_gmailerrorred),
-                  label: const Text(
-                    'Report an issue',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: brandBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: cornerRadius,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
               // Grey and disabled until every item is ticked, then gradient.
               DecoratedBox(
                 decoration: BoxDecoration(

@@ -21,12 +21,7 @@ class StrathCleanApp extends StatelessWidget {
       title: 'StrathClean',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: colors,
-          appBarTheme: AppBarTheme(
-          backgroundColor: colors.surfaceContainer, // the scrolled tint
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
       ),
       initialRoute: '/',
       onGenerateRoute: (settings) {
