@@ -49,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
     final email = _emailController.text.trim();
     // TODO: hook up login logic here.
+    Navigator.pushReplacementNamed(context, '/home');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Logging in as $email')),
     );

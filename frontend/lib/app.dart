@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:strath_clean/features/auth/login_page.dart';
 import 'package:strath_clean/theme/app_colors.dart';
+import 'package:strath_clean/features/pages/home.dart';
+import 'package:strath_clean/features/pages/findroom.dart';
+import 'package:strath_clean/features/pages/issues.dart';
+import 'package:strath_clean/features/pages/menu.dart';
 
 class StrathCleanApp extends StatelessWidget {
   const StrathCleanApp({super.key});
@@ -12,12 +16,24 @@ class StrathCleanApp extends StatelessWidget {
       title: 'StrathClean',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: brandTeal),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 225, 123, 236)),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const LoginPage(),
-      },
+      onGenerateRoute: (settings) {
+      final pages = <String, Widget>{
+        '/': const LoginPage(),
+        '/home': const HomePage(),
+        '/findroom': const FindRoomPage(),
+        '/issues': const IssuesPage(),
+        '/menu': const MenuPage(),
+      };
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (_, __, ___) => pages[settings.name] ?? const LoginPage(),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      );
+    },
     );
   }
 }
