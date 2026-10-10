@@ -174,26 +174,22 @@ class _FindRoomPageState extends State<FindRoomPage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('StrathClean')),
       bottomNavigationBar: const AppNavBar(currentIndex: 1),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(left: 24, bottom: 0, top: 0, right: 24),
+          padding: const EdgeInsets.only(left: 24, bottom: 0, top: 24, right: 24),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  'Find Room',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 36),
+                  'Find a room',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
                 const Text(
                   'Scan the QR code on the room door',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
 

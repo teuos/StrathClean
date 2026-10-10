@@ -32,7 +32,6 @@ class _AuditPageState extends State<AuditPage> {
     final room = widget.room;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Audit')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

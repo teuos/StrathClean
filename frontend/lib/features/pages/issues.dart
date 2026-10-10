@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'package:strath_clean/theme/app_colors.dart';
+import 'package:strath_clean/widgets/gradient_outline_input_border.dart';
 import 'package:strath_clean/widgets/navbar.dart';
 
 class IssuesPage extends StatefulWidget {
@@ -9,11 +12,6 @@ class IssuesPage extends StatefulWidget {
 }
 
 class _IssuesPageState extends State<IssuesPage> {
-  static const _navy = Color(0xFF0E2A4D);
-  static const _bg = Color(0xFFF4F6FA);
-  static const _selectedFill = Color(0xFFE8F0F9);
-  static const _radius = BorderRadius.all(Radius.circular(10));
-
   static const _categories = <(String, IconData)>[
     ('PAT testing', Icons.electrical_services),
     ('Door lock', Icons.key),
@@ -26,6 +24,26 @@ class _IssuesPageState extends State<IssuesPage> {
     'Urgent · Needs attention soon',
     'Emergency · Immediate danger',
   ];
+
+  // Same field style as the login and Find room pages.
+  static const _fieldDecoration = InputDecoration(
+    enabledBorder: GradientOutlineInputBorder(
+      gradient: brandGradient,
+      width: 1.5,
+    ),
+    focusedBorder: GradientOutlineInputBorder(
+      gradient: brandGradient,
+      width: 2.5,
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: cornerRadius,
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: cornerRadius,
+      borderSide: BorderSide(color: Colors.red, width: 2.5),
+    ),
+  );
 
   final _formKey = GlobalKey<FormState>();
   final _itemController = TextEditingController();
@@ -41,47 +59,32 @@ class _IssuesPageState extends State<IssuesPage> {
     super.dispose();
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      // Handle the submitted form here.
-    }
-  }
+  bool get _isComplete =>
+      _category != null &&
+      _itemController.text.trim().isNotEmpty &&
+      _descController.text.trim().isNotEmpty;
 
-  InputDecoration _decoration({String? hint, Widget? suffix}) =>
-      InputDecoration(
-        hintText: hint,
-        suffixIcon: suffix,
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: const OutlineInputBorder(
-          borderRadius: _radius,
-          borderSide: BorderSide(color: Color(0xFFDDE3EC)),
-        ),
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: _radius,
-          borderSide: BorderSide(color: Color(0xFFDDE3EC)),
-        ),
-      );
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    // TODO: send the issue to your backend here.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$_category issue reported')),
+    );
+  }
 
   Widget _label(String text, {String? trailing}) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text.rich(
           TextSpan(
             text: text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: _navy,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             children: [
               if (trailing != null)
                 TextSpan(
                   text: ' · $trailing',
                   style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black54,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.grey,
                   ),
                 ),
             ],
@@ -91,33 +94,46 @@ class _IssuesPageState extends State<IssuesPage> {
 
   Widget _categoryCard(String label, IconData icon) {
     final selected = _category == label;
+
     return InkWell(
-      borderRadius: _radius,
+      borderRadius: cornerRadius,
       onTap: () => setState(() => _category = label),
       child: Ink(
-        decoration: BoxDecoration(
-          color: selected ? _selectedFill : Colors.white,
-          borderRadius: _radius,
-          border: Border.all(
-            color: selected ? _navy : const Color(0xFFDDE3EC),
-          ),
-        ),
+        // Gradient outline when selected, light grey outline when not.
+        decoration: selected
+            ? ShapeDecoration(
+                color: brandPink.withValues(alpha: 0.12),
+                shape: const GradientOutlineInputBorder(
+                  gradient: brandGradient,
+                  width: 2,
+                ),
+              )
+            : ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  borderRadius: cornerRadius,
+                  side: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
           children: [
-            Icon(icon, size: 22, color: _navy),
+            Icon(
+              icon,
+              size: 22,
+              color: selected ? brandBlue : Colors.grey.shade700,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: _navy,
+                style: TextStyle(
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
             ),
-            if (selected) const Icon(Icons.check, size: 18, color: _navy),
+            if (selected)
+              const Icon(Icons.check_circle, size: 18, color: brandBlue),
           ],
         ),
       ),
@@ -127,12 +143,7 @@ class _IssuesPageState extends State<IssuesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
-      appBar: AppBar(
-        backgroundColor: _navy,
-        foregroundColor: Colors.white,
-        title: const Text('Strath Clean'),
-      ),
+      bottomNavigationBar: const AppNavBar(currentIndex: 2),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -141,27 +152,14 @@ class _IssuesPageState extends State<IssuesPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextButton.icon(
-                  onPressed: () => Navigator.maybePop(context),
-                  icon: const Icon(Icons.arrow_back, size: 18),
-                  label: const Text('Back'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: _navy,
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
-                const SizedBox(height: 8),
                 const Text(
                   'Report an issue',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: _navy,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
-                
+                const Text(
+                  'Let the right team know what needs fixing',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
                 const SizedBox(height: 24),
 
                 _label('What needs attention?'),
@@ -202,11 +200,12 @@ class _IssuesPageState extends State<IssuesPage> {
                 _label('Item or area'),
                 TextFormField(
                   controller: _itemController,
-                  decoration: _decoration(
-                    hint: 'e.g. Chair by the window',
-                    suffix: const Icon(Icons.edit_outlined, size: 18),
+                  textInputAction: TextInputAction.next,
+                  decoration: _fieldDecoration.copyWith(
+                    hintText: 'e.g. Chair by the window',
+                    prefixIcon: const Icon(Icons.place_outlined),
                   ),
-                  validator: (v) => (v == null || v.isEmpty)
+                  validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Please enter the item or area'
                       : null,
                 ),
@@ -216,8 +215,10 @@ class _IssuesPageState extends State<IssuesPage> {
                 TextFormField(
                   controller: _descController,
                   maxLines: 4,
-                  decoration: _decoration(),
-                  validator: (v) => (v == null || v.isEmpty)
+                  decoration: _fieldDecoration.copyWith(
+                    hintText: 'What is wrong with it?',
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Please enter a description of the issue'
                       : null,
                 ),
@@ -226,7 +227,10 @@ class _IssuesPageState extends State<IssuesPage> {
                 _label('Priority'),
                 DropdownButtonFormField<String>(
                   value: _priority,
-                  decoration: _decoration(),
+                  decoration: _fieldDecoration.copyWith(
+                    prefixIcon: const Icon(Icons.flag_outlined),
+                  ),
+                  borderRadius: cornerRadius,
                   items: [
                     for (final p in _priorities)
                       DropdownMenuItem(value: p, child: Text(p)),
@@ -240,10 +244,12 @@ class _IssuesPageState extends State<IssuesPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F3F8),
-                      borderRadius: _radius,
-                      border: Border.all(color: const Color(0xFFDDE3EC)),
+                    decoration: ShapeDecoration(
+                      color: brandTeal.withValues(alpha: 0.08),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: cornerRadius,
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -256,7 +262,7 @@ class _IssuesPageState extends State<IssuesPage> {
                               Text(
                                 _photo!,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               GestureDetector(
@@ -265,50 +271,56 @@ class _IssuesPageState extends State<IssuesPage> {
                                   '1 photo attached · Remove',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.black54,
+                                    color: Colors.grey,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(
-                          Icons.check_circle_outline,
-                          color: Colors.green,
-                        ),
+                        const Icon(Icons.check_circle, color: brandTeal),
                       ],
                     ),
                   ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // Plug in image_picker here.
-                    setState(() => _photo = 'chair-leg.jpg');
-                  },
-                  icon: const Icon(Icons.photo_camera_outlined),
-                  label: Text(
-                    _photo == null ? 'Add a photo' : 'Add another photo',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                // Outlined button with the gradient border.
+                DecoratedBox(
+                  decoration: const ShapeDecoration(
+                    shape: GradientOutlineInputBorder(
+                      gradient: brandGradient,
+                      width: 1.5,
+                    ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: _navy,
-                    side: const BorderSide(color: Color(0xFFDDE3EC)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: const RoundedRectangleBorder(borderRadius: _radius),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      // Plug in image_picker here.
+                      setState(() => _photo = 'chair-leg.jpg');
+                    },
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    label: Text(
+                      _photo == null ? 'Add a photo' : 'Add another photo',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: brandBlue,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: cornerRadius,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE8F0F9),
-                    borderRadius: _radius,
+                  decoration: BoxDecoration(
+                    color: brandTeal.withValues(alpha: 0.1),
+                    borderRadius: cornerRadius,
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.alt_route, color: _navy),
+                      const Icon(Icons.alt_route, color: brandTeal),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -319,8 +331,7 @@ class _IssuesPageState extends State<IssuesPage> {
                                   ? 'Sent to Estates · Furniture repairs'
                                   : 'Sent to the right team',
                               style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F5FA8),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -329,7 +340,7 @@ class _IssuesPageState extends State<IssuesPage> {
                               'category.',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.black54,
+                                color: Colors.grey,
                               ),
                             ),
                           ],
@@ -338,27 +349,49 @@ class _IssuesPageState extends State<IssuesPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
 
-                FilledButton(
-                  onPressed: _submit,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _navy,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: const RoundedRectangleBorder(borderRadius: _radius),
-                  ),
-                  child: const Text(
-                    'Submit issue',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                // Grey until a category is picked and both text boxes are
+                // filled, then the gradient — same as Find room.
+                ListenableBuilder(
+                  listenable: Listenable.merge([
+                    _itemController,
+                    _descController,
+                  ]),
+                  builder: (context, _) {
+                    final ready = _isComplete;
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: ready ? brandGradient : null,
+                        color: ready ? null : Colors.grey.shade400,
+                        borderRadius: cornerRadius,
+                      ),
+                      child: FilledButton(
+                        onPressed: ready ? _submit : null,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          disabledBackgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          foregroundColor: Colors.white,
+                          disabledForegroundColor: Colors.white70,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: cornerRadius,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Submit issue',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: const AppNavBar(currentIndex: 2),
     );
   }
 }
