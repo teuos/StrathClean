@@ -1,7 +1,14 @@
 class AuditInfo {
-  const AuditInfo({required this.title, required this.text, required this.completed});
+  AuditInfo({
+    required this.roomId,
+    required this.time,
+    this.roomType = 'Lecture Hall',
+    this.completed = false
+    }
+  );
 
-  final String title;
-  final String text;
-  final bool completed;
+  final String roomId;
+  final String time;
+  final String roomType;
+  bool completed;
 }

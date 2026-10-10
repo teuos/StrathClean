@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class InfoCard extends StatelessWidget {
-  const InfoCard({super.key, required this.title, required this.text});
+  const InfoCard({super.key, required this.roomId, required this.time});
 
-  final String title;
-  final String text;
+  final String roomId;
+  final String time;
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +15,9 @@ class InfoCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Text(roomId, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text(text, style: Theme.of(context).textTheme.bodyMedium),
+            Text(time, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
       ),

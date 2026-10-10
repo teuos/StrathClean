@@ -4,22 +4,22 @@ import 'package:strath_clean/widgets/infoCard.dart';
 import 'package:strath_clean/widgets/navbar.dart';
 import 'package:strath_clean/widgets/auditInfo.dart';
 
-const List<AuditInfo> homeCards = [
+final List<AuditInfo> homeCards = [
   AuditInfo(
-    title: 'room1',
-    text: 'time',
+    roomId: 'room11',
+    time: 'time',
     completed: false,
   ),
   AuditInfo(
-    title: 'rom2',
-    text: 'time2',
+    roomId: 'rom2',
+    time: 'time2',
     completed: true,
   ),
   AuditInfo(
-    title: 'romm3',
-    text: '.-',
+    roomId: 'romm3',
+    time: '.-',
     completed: false,
-  ),
+  )
 ];
 
 class HomePage extends StatelessWidget {
@@ -42,13 +42,13 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 16),
           for (final card in homeCards)
             if (!card.completed)
-              InfoCard(title: card.title, text: card.text),
+              InfoCard(roomId: card.roomId, time: card.time),
           const Text (
             'Completed'
           ),
           for (final card in homeCards)
             if (card.completed)
-              InfoCard(title: card.title, text: card.text),
+              InfoCard(roomId: card.roomId, time: card.time),
         ],
       ),
       bottomNavigationBar: const AppNavBar(currentIndex: 0),
