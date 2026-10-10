@@ -7,6 +7,7 @@ import 'package:strath_clean/features/pages/home.dart';
 import 'package:strath_clean/features/pages/findroom.dart';
 import 'package:strath_clean/features/pages/issues.dart';
 import 'package:strath_clean/features/pages/menu.dart';
+import 'package:strath_clean/features/pages/roomaudit.dart';
 
 class StrathCleanApp extends StatelessWidget {
   const StrathCleanApp({super.key});
