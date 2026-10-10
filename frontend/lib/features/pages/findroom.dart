@@ -6,6 +6,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:strath_clean/theme/app_colors.dart';
 import 'package:strath_clean/widgets/navbar.dart';
 import 'package:strath_clean/widgets/gradient_outline_input_border.dart';
+import 'package:strath_clean/features/pages/roomaudit.dart';
+import 'package:strath_clean/features/pages/cleanroom.dart';
 
 /// The details encoded in a room's QR code.
 ///
@@ -144,7 +146,18 @@ class _FindRoomPageState extends State<FindRoomPage> {
 
   void _confirm() {
     if (!_formKey.currentState!.validate()) return;
-    // TODO: do something with the room (e.g. open its cleaning checklist).
+    if (!_formKey.currentState!.validate()) return;
+
+    final room = RoomInfo(
+      building: _buildingController.text.trim(),
+      floor: _floorController.text.trim(),
+      room: _roomController.text.trim(),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CleanRoom(room: room)),
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
