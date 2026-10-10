@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:strath_clean/theme/app_colors.dart';
 
 import 'package:strath_clean/features/auth/login_page.dart';
 import 'package:strath_clean/theme/app_colors.dart';
@@ -16,7 +17,7 @@ class StrathCleanApp extends StatelessWidget {
       title: 'StrathClean',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 225, 123, 236)),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
       ),
       initialRoute: '/',
       onGenerateRoute: (settings) {
