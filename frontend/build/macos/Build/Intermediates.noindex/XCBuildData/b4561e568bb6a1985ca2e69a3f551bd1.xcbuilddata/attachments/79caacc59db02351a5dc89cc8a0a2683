@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework-primary.dia",
+    "emit-module-dependencies" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework-primary-emit-module.dia",
+    "pch" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework-primary.swiftdeps"
+  },
+  "/Users/inchysquinchy/Documents/team-17/frontend/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework/Sources/FlutterFramework/FlutterFramework.swift" : {
+    "const-values" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.swiftconstvalues",
+    "dependencies" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.d",
+    "diagnostics" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.dia",
+    "index-unit-output-path" : "/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.o",
+    "llvm-bc" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.bc",
+    "object" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.o",
+    "swift-dependencies" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework.swiftdeps",
+    "swiftmodule" : "/Users/inchysquinchy/Documents/team-17/frontend/build/macos/Build/Intermediates.noindex/FlutterFramework.build/Debug/FlutterFramework-t.build/Objects-normal/arm64/FlutterFramework~partial.swiftmodule"
+  }
+}

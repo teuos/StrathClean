@@ -1,18 +1,39 @@
 import 'package:flutter/material.dart';
 
-import 'package:strath_clean/widgets/navbar.dart';
+// Define a custom Form widget.
+class MyCustomForm extends StatefulWidget {
+  const MyCustomForm({super.key});
 
-class IssuesPage extends StatelessWidget {
-  const IssuesPage({super.key});
+  @override
+  State<MyCustomForm> createState() => _MyCustomFormState();
+}
+
+// Define a corresponding State class.
+// This class holds data related to the form.
+class _MyCustomFormState extends State<MyCustomForm> {
+  // Create a global key that uniquely identifies the Form widget
+  // and allows validation of the form.
+  //
+  // Note: This is a `GlobalKey<FormState>`,
+  // not a GlobalKey<_MyCustomFormState>.
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('StrathClean')),
-      body: const Center(child: Text('Issues!')),
-      bottomNavigationBar: const AppNavBar(currentIndex: 2)
+    // Build a Form widget using the _formKey created above.
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          ElevatedButton.icon(
+            icon: Text('first'),
+              label: Icon(Icons.arrow_forward, size: 16),
+              onPressed: () => {},
+          ),
+        ],
+      ),
     );
   }
-
+  
   
 }
