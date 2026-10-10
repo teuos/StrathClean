@@ -6,6 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Database {
 
@@ -21,7 +27,7 @@ public class Database {
 
         String[] initCommands = {
             "CREATE TABLE IF NOT EXISTS users ("
-                + "id INTEGER PRIMARY KEY,"
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "fname TEXT NOT NULL,"
                 + "lname TEXT NOT NULL,"
                 + "email TEXT NOT NULL,"
@@ -39,18 +45,18 @@ public class Database {
                 + "FOREIGN KEY (cleanerId) REFERENCES users(id),"
                 + "FOREIGN KEY (supervisorId) REFERENCES users(id)"
                 + ")",
-                "CREATE TABLE IF NOT EXISTS issues ("
-                + "issueId INTEGER PRIMARY KEY,"
+                "CREATE TABLE issues ("
+                + "issueId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "userID INTEGER,"
                 + "roomID TEXT,"
                 + "opened TEXT,"
-                + "image BLOB,"
+                + "image TEXT,"
                 + "descript TEXT,"
                 + "FOREIGN KEY (userID) REFERENCES users(id),"
                 + "FOREIGN KEY (roomID) REFERENCES room(roomId)"
                 + ")",
                 "CREATE TABLE IF NOT EXISTS audit ("
-                + "auditID INTEGER PRIMARY KEY,"
+                + "auditID INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "roomID TEXT,"
                 + "supervisorId INTEGER,"
                 + "FOREIGN KEY (roomID) REFERENCES room(roomId),"
@@ -58,7 +64,7 @@ public class Database {
                 + ")"
             };
 
-        String debugCommand = "INSERT INTO users (id, fname, lname, email, password, supervisor) VALUES(1, 'andrew', 'fagan', 'andrewfagan@strath.ac.uk', 'IHeartFred', 0)";
+        String debugCommand = "INSERT INTO users (fname, lname, email, password, supervisor) VALUES('andrew', 'fagan', 'andrewfagan@strath.ac.uk', 'IHeartFred', 0)";
 
         try (Statement stmt = conn.createStatement()) {
             // create the required tables for the application schema
@@ -102,19 +108,78 @@ public class Database {
         return output;
     }
 
-    public int createIssue(int userId, String roomCode, int floor, String building) {
-        String command = "INSERT INTO issues (";
+    public boolean createIssue(int userId, String roomCode, String image, int floor, String building, String description) {
+        String command = "INSERT INTO issues (userID, roomID, opened, image, descript) VALUES (?, ?, ?, ?, ?)";
+
+        // Get the current date and time
+        LocalDateTime now = LocalDateTime.now();
+
+        // Define the format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // Format the current date and time
+        String formattedNow = now.format(formatter);
+
+        // Print the formatted date and time
+        System.out.println("Current Timestamp:" + formattedNow);
+
 
         try (PreparedStatement stmt = conn.prepareStatement(command)) {
-            stmt.setString(1, );
-            stmt.setString(2, password);
-            output = stmt.executeQuery().getInt("id");
+            stmt.setInt(1, userId);
+            stmt.setString(2, roomCode);
+            stmt.setString(3, formattedNow);
+            stmt.setString(4, image);
+            stmt.setString(5, description);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public Map<String, Object> getIssue(int issueId) {
+        String command = "SELECT issueId, userID, roomID, opened, image, descript FROM issues WHERE issueId = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(command)) {
+            stmt.setInt(1, issueId);
+            try (ResultSet result = stmt.executeQuery()) {
+                if (result.next()) {
+                    return mapIssue(result);
+                }
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+
+        return null;
     }
 
+    public List<Map<String, Object>> getAllIssues() {
+        String command = "SELECT issueId, userID, roomID, opened, image, descript FROM issues";
+        List<Map<String, Object>> issues = new ArrayList<>();
 
+        try (Statement stmt = conn.createStatement(); ResultSet result = stmt.executeQuery(command)) {
+            while (result.next()) {
+                issues.add(mapIssue(result));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return issues;
+    }
+
+    private Map<String, Object> mapIssue(ResultSet result) throws SQLException {
+        Map<String, Object> issue = new LinkedHashMap<>();
+        issue.put("issueId", result.getInt("issueId"));
+        issue.put("userID", result.getInt("userID"));
+        issue.put("roomID", result.getString("roomID"));
+        issue.put("opened", result.getString("opened"));
+        issue.put("image", result.getString("image"));
+        issue.put("descript", result.getString("descript"));
+        return issue;
+    }
 
 
 }
