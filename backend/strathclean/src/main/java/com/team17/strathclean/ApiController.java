@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+import java.util.Map;
+
 import kong.unirest.json.JSONObject;
 
 
@@ -54,5 +57,19 @@ public class ApiController {
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create issue");
         }
+    }
+
+    @GetMapping("/getIssue")
+    public ResponseEntity<Map<String, Object>> getIssue(@RequestParam int issueId) {
+        Map<String, Object> issue = db.getIssue(issueId);
+        if (issue == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(issue);
+    }
+
+    @GetMapping("/getAllIssues")
+    public List<Map<String, Object>> getAllIssues() {
+        return db.getAllIssues();
     }
 }
