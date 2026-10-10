@@ -17,6 +17,11 @@ Widget build(BuildContext context) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text(
+              'Menu',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
             DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: brandGradient,
