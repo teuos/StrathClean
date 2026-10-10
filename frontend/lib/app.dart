@@ -14,6 +14,9 @@ class StrathCleanApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final colors = ColorScheme.fromSeed(seedColor: brandTeal);
+
     return MaterialApp(
       title: 'StrathClean',
       debugShowCheckedModeBanner: false,
@@ -26,7 +29,7 @@ class StrathCleanApp extends StatelessWidget {
         '/': const LoginPage(),
         '/home': const HomePage(),
         '/findroom': const FindRoomPage(),
-        '/issues': const IssuesPage(),
+        '/issues':  IssuesPage(),
         '/menu': const MenuPage(),
       };
       return PageRouteBuilder(
