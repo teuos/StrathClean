@@ -34,11 +34,11 @@ Widget build(BuildContext context) {
                   shape: const RoundedRectangleBorder(
                     borderRadius: cornerRadius,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
                   'Account Settings',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -46,8 +46,7 @@ Widget build(BuildContext context) {
         ),
       ),
     ),
-
-      bottomNavigationBar: const AppNavBar(currentIndex: 3)
+    bottomNavigationBar: const AppNavBar(currentIndex: 3),
   );
 }
 }

@@ -15,12 +15,14 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
+        .package(name: "mobile_scanner", path: "../.packages/mobile_scanner-7.4.2"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
+                .product(name: "mobile-scanner", package: "mobile_scanner"),
                 .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )

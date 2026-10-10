@@ -26,7 +26,7 @@ class StrathCleanApp extends StatelessWidget {
         '/': const LoginPage(),
         '/home': const HomePage(),
         '/findroom': const FindRoomPage(),
-        '/issues': const IssuesPage(),
+        '/issues':  IssuesPage(),
         '/menu': const MenuPage(),
       };
       return PageRouteBuilder(
