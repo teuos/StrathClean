@@ -43,13 +43,7 @@ public class ApiController {
     }
 
     @PostMapping("/createIssue")
-    public ResponseEntity<String> createIssue(
-            @RequestHeader int userId,
-            @RequestParam String roomCode,
-            @RequestParam String image,
-            @RequestParam int floor,
-            @RequestParam String building,
-            @RequestParam String description) {
+    public ResponseEntity<String> createIssue(@RequestHeader int userId, @RequestParam String roomCode, @RequestParam String image, @RequestParam int floor, @RequestParam String building, @RequestParam String description) {
             
         boolean success = db.createIssue(userId, roomCode, image, floor, building, description);
         if (success) {
@@ -71,5 +65,36 @@ public class ApiController {
     @GetMapping("/getAllIssues")
     public List<Map<String, Object>> getAllIssues() {
         return db.getAllIssues();
+    }
+
+    @PostMapping("/assignFloors")
+    public ResponseEntity<String> assignFloors(@RequestHeader int userId) {
+        int[] assignedFloors = db.assignRandomTwoFloors(userId, 15);
+        if (assignedFloors == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Total floors must be at least 2");
+        }
+        JSONObject response = new JSONObject();
+        response.put("floor1", assignedFloors[0]);
+        response.put("floor2", assignedFloors[1]);
+        return ResponseEntity.ok(response.toString());
+    }
+
+    @GetMapping ("/getAssignedFloors")
+    public ResponseEntity<Map<String, Object>> getAssignedFloors(@RequestHeader int userId) {
+        Map<String, Object> assignedFloors = db.getAssignedFloors(userId);
+        if (assignedFloors == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+        return ResponseEntity.ok(assignedFloors);
+        }
+    }
+
+    @GetMapping("/getAssignedRooms")
+    public ResponseEntity<Map<String, Object>> getAssignedRooms(@RequestHeader int userId) {
+        Map<String, Object> assignedRooms = db.getAssignedRooms(userId);
+        if (assignedRooms == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(assignedRooms);
     }
 }

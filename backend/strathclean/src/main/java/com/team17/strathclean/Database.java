@@ -45,7 +45,7 @@ public class Database {
                 + "FOREIGN KEY (cleanerId) REFERENCES users(id),"
                 + "FOREIGN KEY (supervisorId) REFERENCES users(id)"
                 + ")",
-                "CREATE TABLE issues ("
+                "CREATE TABLE IF NOT EXISTS issues ("
                 + "issueId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "userID INTEGER,"
                 + "roomID TEXT,"
@@ -61,7 +61,22 @@ public class Database {
                 + "supervisorId INTEGER,"
                 + "FOREIGN KEY (roomID) REFERENCES room(roomId),"
                 + "FOREIGN KEY (supervisorId) REFERENCES users(id)"
-                + ")"
+                + ")",
+                "CREATE TABLE IF NOT EXISTS assigned ("
+                + "assignmentID INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "userID INTEGER NOT NULL,"
+                + "floor1 INTEGER,"
+                + "floor2 INTEGER,"
+                + "FOREIGN KEY (userID) REFERENCES users(id)"
+                + ")",
+                "CREATE TRIGGER IF NOT EXISTS assigned_floors_unique "
+                + "BEFORE INSERT ON assigned "
+                + "WHEN NEW.floor1 = NEW.floor2 OR EXISTS ("
+                + "SELECT 1 FROM assigned "
+                + "WHERE floor1 IN (NEW.floor1, NEW.floor2) "
+                + "OR floor2 IN (NEW.floor1, NEW.floor2)) "
+                + "BEGIN SELECT RAISE(ABORT, 'floor already assigned'); END"
+
             };
 
         String debugCommand = "INSERT INTO users (fname, lname, email, password, supervisor) VALUES('andrew', 'fagan', 'andrewfagan@strath.ac.uk', 'IHeartFred', 0)";
@@ -180,6 +195,191 @@ public class Database {
         issue.put("descript", result.getString("descript"));
         return issue;
     }
+
+    public Map<String, Object> getRoom(String roomId) {
+        String command = "SELECT roomId, floor, building, cleanerId, supervisorId, lastCleaned, lastAudited FROM room WHERE roomId = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(command)) {
+            stmt.setString(1, roomId);
+            try (ResultSet result = stmt.executeQuery()) {
+                if (result.next()) {
+                    return mapRoom(result);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    private Map<String, Object> mapRoom(ResultSet result) {
+        Map<String, Object> room = new LinkedHashMap<>();
+        try {
+            room.put("roomId", result.getString("roomId"));
+            room.put("floor", result.getInt("floor"));
+            room.put("building", result.getString("building"));
+            room.put("cleanerId", result.getInt("cleanerId"));
+            room.put("supervisorId", result.getInt("supervisorId"));
+            room.put("lastCleaned", result.getString("lastCleaned"));
+            room.put("lastAudited", result.getString("lastAudited"));
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return room; 
+    }
+
+    public List<Map<String, Object>> getAllRooms() {
+        String command = "SELECT roomId, floor, building, cleanerId, supervisorId, lastCleaned, lastAudited FROM room";
+        List<Map<String, Object>> rooms = new ArrayList<>();
+
+        try (Statement stmt = conn.createStatement(); ResultSet result = stmt.executeQuery(command)) {
+            while (result.next()) {
+                rooms.add(mapRoom(result));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return rooms;
+    }
+
+    public int[] assignRandomTwoFloors(int userId, int totalFloors) {
+        if (totalFloors < 2) {
+            return null;
+        }
+
+        String availabilityCommand = "SELECT COUNT(DISTINCT floor) FROM ("
+            + "SELECT floor1 AS floor FROM assigned UNION ALL "
+            + "SELECT floor2 AS floor FROM assigned) WHERE floor BETWEEN 1 AND ?";
+        String conflictCommand = "SELECT 1 FROM assigned "
+            + "WHERE floor1 IN (?, ?) OR floor2 IN (?, ?) LIMIT 1";
+        String insertCommand = "INSERT INTO assigned (userID, floor1, floor2) VALUES (?, ?, ?)";
+
+        try {
+            conn.setAutoCommit(false);
+
+            int assignedFloorCount;
+            try (PreparedStatement stmt = conn.prepareStatement(availabilityCommand)) {
+                stmt.setInt(1, totalFloors);
+                try (ResultSet result = stmt.executeQuery()) {
+                    result.next();
+                    assignedFloorCount = result.getInt(1);
+                }
+            }
+            if (totalFloors - assignedFloorCount < 2) {
+                conn.rollback();
+                return null;
+            }
+
+            try (PreparedStatement conflictStmt = conn.prepareStatement(conflictCommand);
+                 PreparedStatement insertStmt = conn.prepareStatement(insertCommand)) {
+                while (true) {
+                    int floor1 = (int) (Math.random() * totalFloors) + 1;
+                    int floor2;
+                    do {
+                        floor2 = (int) (Math.random() * totalFloors) + 1;
+                    } while (floor2 == floor1);
+
+                    conflictStmt.setInt(1, floor1);
+                    conflictStmt.setInt(2, floor2);
+                    conflictStmt.setInt(3, floor1);
+                    conflictStmt.setInt(4, floor2);
+                    try (ResultSet conflicts = conflictStmt.executeQuery()) {
+                        if (conflicts.next()) {
+                            continue;
+                        }
+                    }
+
+                    insertStmt.setInt(1, userId);
+                    insertStmt.setInt(2, floor1);
+                    insertStmt.setInt(3, floor2);
+                    insertStmt.executeUpdate();
+                    conn.commit();
+                    return new int[] {floor1, floor2};
+                }
+            }
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackError) {
+                e.addSuppressed(rollbackError);
+            }
+            System.out.println(e.getMessage());
+            return null;
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public Map<String, Object> getAssignedFloors(int userId) {
+        String command = "SELECT floor1, floor2 FROM assigned WHERE userID = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(command)) {
+            stmt.setInt(1, userId);
+            try (ResultSet result = stmt.executeQuery()) {
+                if (result.next()) {
+                    Map<String, Object> assignedFloors = new LinkedHashMap<>();
+                    assignedFloors.put("floor1", result.getInt("floor1"));
+                    assignedFloors.put("floor2", result.getInt("floor2"));
+                    return assignedFloors;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    public Map<String, Object> getAssignedRooms(int userId) {
+        String assignmentCommand = "SELECT floor1, floor2 FROM assigned WHERE userID = ?";
+        String roomsCommand = "SELECT roomId, floor, building FROM room WHERE floor IN ("
+            + "SELECT floor1 FROM assigned WHERE userID = ? UNION "
+            + "SELECT floor2 FROM assigned WHERE userID = ?) ORDER BY floor, roomId";
+
+        try (PreparedStatement assignmentStmt = conn.prepareStatement(assignmentCommand)) {
+            assignmentStmt.setInt(1, userId);
+            try (ResultSet assignment = assignmentStmt.executeQuery()) {
+                if (!assignment.next()) {
+                    return null;
+                }
+
+                List<Integer> assignedFloors = new ArrayList<>();
+                assignedFloors.add(assignment.getInt("floor1"));
+                assignedFloors.add(assignment.getInt("floor2"));
+
+                List<Map<String, Object>> assignedRooms = new ArrayList<>();
+                try (PreparedStatement roomsStmt = conn.prepareStatement(roomsCommand)) {
+                    roomsStmt.setInt(1, userId);
+                    roomsStmt.setInt(2, userId);
+                    try (ResultSet result = roomsStmt.executeQuery()) {
+                        while (result.next()) {
+                            Map<String, Object> room = new LinkedHashMap<>();
+                            room.put("roomId", result.getString("roomId"));
+                            room.put("floor", result.getInt("floor"));
+                            room.put("building", result.getString("building"));
+                            assignedRooms.add(room);
+                        }
+                    }
+                }
+
+                Map<String, Object> response = new LinkedHashMap<>();
+                response.put("assignedFloors", assignedFloors);
+                response.put("assignedRooms", assignedRooms);
+                return response;
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
 
 
 }
