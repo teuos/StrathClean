@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:strath_clean/models/issue.dart';
+import 'package:strath_clean/services/api_service.dart';
+import 'package:strath_clean/services/session.dart';
 import 'package:strath_clean/theme/app_colors.dart';
 import 'package:strath_clean/widgets/gradient_outline_input_border.dart';
 import 'package:strath_clean/widgets/navbar.dart';
@@ -46,30 +50,89 @@ class _IssuesPageState extends State<IssuesPage> {
   );
 
   final _formKey = GlobalKey<FormState>();
-  final _itemController = TextEditingController();
+  final _buildingController = TextEditingController();
+  final _floorController = TextEditingController();
+  final _roomController = TextEditingController();
   final _descController = TextEditingController();
   String? _category;
   String _priority = _priorities.first;
   String? _photo; // file name once attached
+  bool _sending = false;
 
   @override
   void dispose() {
-    _itemController.dispose();
+    _buildingController.dispose();
+    _floorController.dispose();
+    _roomController.dispose();
     _descController.dispose();
     super.dispose();
   }
 
   bool get _isComplete =>
       _category != null &&
-      _itemController.text.trim().isNotEmpty &&
+      _buildingController.text.trim().isNotEmpty &&
+      _floorController.text.trim().isNotEmpty &&
+      _roomController.text.trim().isNotEmpty &&
       _descController.text.trim().isNotEmpty;
 
-  void _submit() {
+  String? _required(String? value, String message) =>
+      (value == null || value.trim().isEmpty) ? message : null;
+
+  void _resetForm() {
+    _formKey.currentState!.reset();
+    _buildingController.clear();
+    _floorController.clear();
+    _roomController.clear();
+    _descController.clear();
+    setState(() {
+      _category = null;
+      _priority = _priorities.first;
+      _photo = null;
+    });
+  }
+
+  void _showMessage(String text) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    // TODO: send the issue to your backend here.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$_category issue reported')),
-    );
+
+    final userId = Session.userId;
+    if (userId == null) {
+      _showMessage('Please log in again before reporting an issue');
+      return;
+    }
+
+    setState(() => _sending = true);
+
+    try {
+      await ApiService.createIssue(
+        userId: userId,
+        roomCode: _roomController.text.trim(),
+        building: _buildingController.text.trim(),
+        floor: int.parse(_floorController.text.trim()),
+        // TODO: replace with a real uploaded image once photo upload exists.
+        image: _photo ?? '',
+        description: Issue.encodeDescription(
+          category: _category!,
+          // Keep just "Urgent" from "Urgent · Needs attention soon".
+          priority: _priority.split(' · ').first,
+          description: _descController.text.trim(),
+        ),
+      );
+
+      if (!mounted) return;
+      _showMessage('$_category issue reported');
+      _resetForm();
+    } catch (e) {
+      debugPrint('createIssue error: $e');
+      if (mounted) _showMessage("Couldn't send the issue. Please try again.");
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
   }
 
   Widget _label(String text, {String? trailing}) => Padding(
@@ -197,17 +260,67 @@ class _IssuesPageState extends State<IssuesPage> {
                 ),
                 const SizedBox(height: 20),
 
-                _label('Item or area'),
+                _label('Building'),
                 TextFormField(
-                  controller: _itemController,
+                  controller: _buildingController,
                   textInputAction: TextInputAction.next,
                   decoration: _fieldDecoration.copyWith(
-                    hintText: 'e.g. Chair by the window',
-                    prefixIcon: const Icon(Icons.place_outlined),
+                    hintText: 'e.g. Livingstone Tower',
+                    prefixIcon: const Icon(Icons.apartment),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Please enter the item or area'
-                      : null,
+                  validator: (v) => _required(v, 'Please enter the building'),
+                ),
+                const SizedBox(height: 20),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _label('Floor'),
+                          TextFormField(
+                            controller: _floorController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            textInputAction: TextInputAction.next,
+                            decoration: _fieldDecoration.copyWith(
+                              hintText: 'e.g. 11',
+                              prefixIcon: const Icon(Icons.stairs),
+                            ),
+                            validator: (v) => int.tryParse(v?.trim() ?? '') ==
+                                    null
+                                ? 'Enter a number'
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _label('Room number'),
+                          TextFormField(
+                            controller: _roomController,
+                            textInputAction: TextInputAction.next,
+                            decoration: _fieldDecoration.copyWith(
+                              hintText: 'e.g. LT1105',
+                              prefixIcon: const Icon(Icons.meeting_room),
+                            ),
+                            validator: (v) =>
+                                _required(v, 'Enter a room number'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
 
@@ -355,7 +468,9 @@ class _IssuesPageState extends State<IssuesPage> {
                 // filled, then the gradient — same as Find room.
                 ListenableBuilder(
                   listenable: Listenable.merge([
-                    _itemController,
+                    _buildingController,
+                    _floorController,
+                    _roomController,
                     _descController,
                   ]),
                   builder: (context, _) {
@@ -367,7 +482,7 @@ class _IssuesPageState extends State<IssuesPage> {
                         borderRadius: cornerRadius,
                       ),
                       child: FilledButton(
-                        onPressed: ready ? _submit : null,
+                        onPressed: ready && !_sending ? _submit : null,
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           disabledBackgroundColor: Colors.transparent,
@@ -379,10 +494,19 @@ class _IssuesPageState extends State<IssuesPage> {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text(
-                          'Submit issue',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        child: _sending
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Submit issue',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                       ),
                     );
                   },

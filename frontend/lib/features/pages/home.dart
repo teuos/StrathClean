@@ -88,7 +88,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-/// A small summary box with a count, e.g. "3 To do".
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.label,
@@ -137,7 +136,6 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-/// Section title with a count bubble, e.g. "Assignments (2)".
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title, required this.count});
 
@@ -173,7 +171,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// Grey text shown when a section has no cards.
 class _EmptyMessage extends StatelessWidget {
   const _EmptyMessage(this.text);
 

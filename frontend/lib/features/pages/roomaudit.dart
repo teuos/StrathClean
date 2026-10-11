@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 
 import 'package:strath_clean/features/pages/findroom.dart'; // RoomInfo
 import 'package:strath_clean/theme/app_colors.dart';
+import 'package:strath_clean/models/issue.dart';
 
 enum AuditResult { pass, fail }
 
 class AuditPage extends StatefulWidget {
-  const AuditPage({super.key, required this.room});
+  const AuditPage({super.key, required this.room, required this.issue});
 
   final RoomInfo room;
+  final Issue issue;
 
   @override
   State<AuditPage> createState() => _AuditPageState();
@@ -30,6 +32,12 @@ class _AuditPageState extends State<AuditPage> {
   @override
   Widget build(BuildContext context) {
     final room = widget.room;
+    final issue = widget.issue;
+
+    final location = [
+      if (room.building.isNotEmpty) room.building,
+      if (room.floor.isNotEmpty) 'floor ${room.floor}',
+    ].join(', ');
 
     return Scaffold(
       appBar: AppBar(title: const Text('Audit')),
@@ -39,13 +47,18 @@ class _AuditPageState extends State<AuditPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Heading + subheading
               Text(
                 room.room,
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
+              if (location.isNotEmpty)
+                Text(
+                  location,
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
               Text(
-                '${room.building}, floor ${room.floor}',
+                issue.description,
                 style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 20),

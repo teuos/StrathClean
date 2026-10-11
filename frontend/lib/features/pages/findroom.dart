@@ -9,11 +9,6 @@ import 'package:strath_clean/widgets/gradient_outline_input_border.dart';
 import 'package:strath_clean/features/pages/roomaudit.dart';
 import 'package:strath_clean/features/pages/cleanroom.dart';
 
-/// The details encoded in a room's QR code.
-///
-/// Supported QR contents:
-///   JSON:  {"building":"Livingstone Tower","floor":"5","room":"LT5.12"}
-///   Plain: Livingstone Tower|5|LT5.12        (building|floor|room)
 class RoomInfo {
   const RoomInfo({
     required this.building,

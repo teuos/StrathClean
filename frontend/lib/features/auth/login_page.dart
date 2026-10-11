@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:strath_clean/services/api_service.dart';
+import 'package:strath_clean/services/session.dart';
 import 'package:strath_clean/theme/app_colors.dart';
 import 'package:strath_clean/widgets/gradient_outline_input_border.dart';
 
@@ -14,6 +16,9 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _loading = false;
+  bool _obscurePassword = true;
 
   // Approximate line height of the 35pt title, used to land
   // "Login" at 1/3 of the screen height.
@@ -45,14 +50,37 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final email = _emailController.text.trim();
-    // TODO: hook up login logic here.
-    Navigator.pushReplacementNamed(context, '/home');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Logging in as $email')),
-    );
+
+    setState(() => _loading = true);
+
+    try {
+      final userId = await ApiService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (userId != null) {
+        Session.userId = userId; // needed later, e.g. to create issues
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        _showError('Incorrect email or password');
+      }
+    } catch (e) {
+      debugPrint('Login error: $e');
+      if (mounted) _showError("Couldn't reach the server");
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   String? _validateEmail(String? value) {
@@ -104,6 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 28),
                 TextFormField(
                   controller: _emailController,
+                  enabled: !_loading,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
                   textInputAction: TextInputAction.next,
@@ -115,13 +144,26 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  enabled: !_loading,
+                  obscureText: _obscurePassword,
                   autofillHints: const [AutofillHints.password],
                   textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
+                  onFieldSubmitted: (_) => _loading ? null : _submit(),
                   validator: _validatePassword,
                   decoration: _fieldDecoration.copyWith(
                     hintText: 'password',
+                    suffixIcon: IconButton(
+                      tooltip:
+                          _obscurePassword ? 'Show password' : 'Hide password',
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () => setState(
+                        () => _obscurePassword = !_obscurePassword,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -133,20 +175,31 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: cornerRadius,
                   ),
                   child: FilledButton(
-                    onPressed: _submit,
+                    onPressed: _loading ? null : _submit,
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.transparent,
+                      disabledBackgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
                       foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
                         borderRadius: cornerRadius,
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Continue',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
