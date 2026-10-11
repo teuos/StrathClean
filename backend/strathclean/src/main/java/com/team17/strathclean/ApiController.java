@@ -1,0 +1,100 @@
+package com.team17.strathclean;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+import java.util.Map;
+
+import kong.unirest.json.JSONObject;
+
+
+@RestController
+public class ApiController {
+
+    private Database db = new Database(); //connects to database
+
+    @GetMapping("/getName")
+    public String getName(@RequestHeader int id) {
+        JSONObject response = new JSONObject();
+        String name = db.getName(id);
+
+        response.put("name", name);
+
+        return response.toString();
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<String> login( @RequestParam String email, @RequestParam String password) {
+        int id = db.checkEmail(email, password);
+
+        if (id < 1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        JSONObject response = new JSONObject();
+        response.put("id", id);
+        return ResponseEntity.ok(response.toString());
+    }
+
+    @PostMapping("/createIssue")
+    public ResponseEntity<String> createIssue(@RequestHeader int userId, @RequestParam String roomCode, @RequestParam String image, @RequestParam int floor, @RequestParam String building, @RequestParam String description) {
+            
+        boolean success = db.createIssue(userId, roomCode, image, floor, building, description);
+        if (success) {
+            return ResponseEntity.ok("Issue created successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create issue");
+        }
+    }
+
+    @GetMapping("/getIssue")
+    public ResponseEntity<Map<String, Object>> getIssue(@RequestParam int issueId) {
+        Map<String, Object> issue = db.getIssue(issueId);
+        if (issue == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(issue);
+    }
+
+    @GetMapping("/getAllIssues")
+    public List<Map<String, Object>> getAllIssues() {
+        return db.getAllIssues();
+    }
+
+    @PostMapping("/assignFloors")
+    public ResponseEntity<String> assignFloors(@RequestHeader int userId) {
+        int[] assignedFloors = db.assignRandomTwoFloors(userId, 15);
+        if (assignedFloors == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Total floors must be at least 2");
+        }
+        JSONObject response = new JSONObject();
+        response.put("floor1", assignedFloors[0]);
+        response.put("floor2", assignedFloors[1]);
+        return ResponseEntity.ok(response.toString());
+    }
+
+    @GetMapping ("/getAssignedFloors")
+    public ResponseEntity<Map<String, Object>> getAssignedFloors(@RequestHeader int userId) {
+        Map<String, Object> assignedFloors = db.getAssignedFloors(userId);
+        if (assignedFloors == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+        return ResponseEntity.ok(assignedFloors);
+        }
+    }
+
+    @GetMapping("/getAssignedRooms")
+    public ResponseEntity<Map<String, Object>> getAssignedRooms(@RequestHeader int userId) {
+        Map<String, Object> assignedRooms = db.getAssignedRooms(userId);
+        if (assignedRooms == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(assignedRooms);
+    }
+}
